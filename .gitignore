@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+.env
+
+# Expo / React Native
+**/node_modules/
+**/.expo/
+**/dist/
+
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project Specific
+backend.zip
+wsi-app.zip
+sos_log.json
+safe_zones_cache.json
