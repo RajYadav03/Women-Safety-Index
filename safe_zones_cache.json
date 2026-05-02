@@ -1,0 +1,25 @@
+{
+  "phagwara": [
+    {
+      "name": "Phagwara Civil Hospital",
+      "type": "hospital",
+      "lat": 31.224,
+      "lon": 75.77,
+      "why_safe": "24/7 government hospital with security guards"
+    },
+    {
+      "name": "BMC Chowk Police Station",
+      "type": "police",
+      "lat": 31.229,
+      "lon": 75.776,
+      "why_safe": "Main police station with women's helpdesk"
+    },
+    {
+      "name": "Lovely Mall Phagwara",
+      "type": "mall",
+      "lat": 31.221,
+      "lon": 75.773,
+      "why_safe": "Busy commercial mall with CCTV and security"
+    }
+  ]
+}
