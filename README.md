@@ -49,26 +49,49 @@ Get a professional, at-a-glance safety report using our custom Bento UI:
 
 ## 🚀 Getting Started
 
-### 1. Backend Setup
+To get the entire platform up and running, follow these three phases in order:
+
+### 1. Data Generation & Model Training (ML)
+Since we do not commit massive datasets to GitHub, you must first generate the synthetic data and model files:
+
+1. Open the `ml/` directory on your machine.
+2. Run the Jupyter Notebooks in the following order:
+   - **`Data_Creation.ipynb`**: Generates the raw `synthetic_wsi_delhi_localities.csv` (1,000,000 rows) and pre-computes the initial `locality_aggregates.json`.
+   - **`Feature_Engineering.ipynb`**: Transforms variables and encodes cyclic times to output `synthetic_wsi_delhi_engineered.csv`.
+   - **`ML.ipynb`**: Trains the XGBoost regression model, producing `xgboost_wsi_model.json`.
+3. If you want to update the backend's lookup table with your freshly trained data, make sure the generated `locality_aggregates.json` is present in the root directory.
+
+---
+
+### 2. Backend Setup (Root Directory)
+The backend files are hosted in the root of the repository.
+
 ```bash
-cd backend
+# Create and activate virtual environment
 python -m venv venv
-source venv/bin/activate  # or venv\Scripts\activate on Windows
+source venv/bin/activate  # On Windows, use: venv\Scripts\activate
+
+# Install requirements
 pip install -r requirements.txt
 ```
 
-**Environment Variables (.env):**
+**Configure Environment Variables:**
+Create a `.env` file in the root directory:
 ```env
-GROQ_API_KEY=your_key_here  # For high-speed AI
-GEMINI_API_KEY=your_key_here # Optional fallback
+GROQ_API_KEY=your_groq_api_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
-**Run Backend:**
+**Start Backend Server:**
 ```bash
-python -m uvicorn backend.main:app --reload
+python -m uvicorn main:app --reload
 ```
 
-### 2. Frontend Setup
+---
+
+### 3. Frontend Setup (Mobile App)
+Now launch the interactive React Native mobile application:
+
 ```bash
 cd wsi-app
 npm install
