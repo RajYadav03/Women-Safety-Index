@@ -49,31 +49,33 @@ Get a professional, at-a-glance safety report using our custom Bento UI:
 
 ## 🚀 Getting Started
 
-To get the entire platform up and running, follow these three phases in order:
+To get the entire platform up and running, follow these steps in order:
 
-### 1. Data Generation & Model Training (ML)
-Since we do not commit massive datasets to GitHub, you must first generate the synthetic data and model files:
+### 1. Environment Setup (One-Time)
+We have merged all Backend and Machine Learning requirements into a single, unified `requirements.txt` file at the root.
 
-1. Open the `ml/` directory on your machine.
-2. Run the Jupyter Notebooks in the following order:
-   - **`Data_Creation.ipynb`**: Generates the raw `synthetic_wsi_delhi_localities.csv` (1,000,000 rows) and pre-computes the initial `locality_aggregates.json`.
-   - **`Feature_Engineering.ipynb`**: Transforms variables and encodes cyclic times to output `synthetic_wsi_delhi_engineered.csv`.
-   - **`ML.ipynb`**: Trains the XGBoost regression model, producing `xgboost_wsi_model.json`.
-3. If you want to update the backend's lookup table with your freshly trained data, make sure the generated `locality_aggregates.json` is present in the root directory.
+```bash
+
+# Install all Backend & ML dependencies in one go
+pip install -r requirements.txt
+```
 
 ---
 
-### 2. Backend Setup (Root Directory)
-The backend files are hosted in the root of the repository.
+### 2. Data Generation & Model Training (ML)
+Since we do not commit massive datasets to GitHub, you must generate the synthetic data and model files first:
 
-```bash
-# Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows, use: venv\Scripts\activate
+1. Open the `ml/` directory on your machine.
+2. Since you already installed the dependencies in Step 1, you can directly run the Jupyter Notebooks in the following order:
+   - **`Data_Creation.ipynb`**: Generates the raw `synthetic_wsi_delhi_localities.csv` (1,000,000 rows) and pre-computes the initial `locality_aggregates.json`.
+   - **`Feature_Engineering.ipynb`**: Transforms variables and encodes cyclic times to output `synthetic_wsi_delhi_engineered.csv`.
+   - **`ML.ipynb`**: Trains the XGBoost regression model, producing `xgboost_wsi_model.json`.
+3. If you want to update the backend's active lookup table with your freshly trained data, make sure the generated `locality_aggregates.json` is present in the root directory.
 
-# Install requirements
-pip install -r requirements.txt
-```
+---
+
+### 3. Backend Setup & Run
+The backend files live directly in the root of the repository.
 
 **Configure Environment Variables:**
 Create a `.env` file in the root directory:
@@ -83,13 +85,14 @@ GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 **Start Backend Server:**
+Ensure your virtual environment is still active, then run:
 ```bash
 python -m uvicorn main:app --reload
 ```
 
 ---
 
-### 3. Frontend Setup (Mobile App)
+### 4. Frontend Setup (Mobile App)
 Now launch the interactive React Native mobile application:
 
 ```bash
