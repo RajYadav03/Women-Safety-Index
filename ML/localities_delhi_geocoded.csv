@@ -1,0 +1,151 @@
+name,latitude,longitude,location_type
+Connaught Place,28.6315,77.2167,commercial
+Karol Bagh,28.6514,77.1889,commercial
+Rajouri Garden,28.6429,77.1187,commercial
+Janakpuri,28.6198,77.085,residential
+Dwarka,28.5921,77.046,residential
+Palam,28.5802,77.0801,residential
+Vasant Kunj,28.5205,77.1558,commercial
+Mahipalpur,28.5483,77.1259,residential
+Hauz Khas,28.5494,77.2,commercial
+Green Park,28.5559,77.2074,commercial
+Saket,28.5203,77.21,commercial
+Malviya Nagar,28.5283,77.2177,commercial
+Lajpat Nagar,28.5676,77.2432,commercial
+Greater Kailash,28.536,77.243,commercial
+Kalkaji,28.5375,77.2588,residential
+Nehru Place,28.5491,77.2518,commercial
+Okhla,28.52,77.29,residential
+Jamia Nagar,28.556,77.294,residential
+Sarita Vihar,28.5317,77.2949,residential
+Ashram,28.585,77.264,residential
+Chittaranjan Park,28.5403,77.2533,residential
+East of Kailash,28.5574,77.2511,residential
+Defence Colony,28.5734,77.2351,commercial
+South Extension,28.5732,77.225,commercial
+New Friends Colony,28.5615,77.2843,residential
+Khan Market,28.6,77.2245,commercial
+Lodhi Colony,28.5855,77.2344,residential
+Chanakyapuri,28.596,77.189,residential
+Sarojini Nagar,28.5737,77.1975,commercial
+RK Puram,28.5617,77.178,residential
+Motibagh,28.589,77.175,residential
+Patel Nagar,28.655,77.171,residential
+Paharganj,28.644,77.215,residential
+Old Delhi,28.6561,77.241,residential
+Chandni Chowk,28.6575,77.2303,commercial
+Kashmere Gate,28.6675,77.2278,residential
+Civil Lines,28.6833,77.224,residential
+Rohini,28.736,77.11,residential
+Pitampura,28.698,77.132,residential
+Shalimar Bagh,28.7185,77.17,residential
+Ashok Vihar,28.682,77.17,residential
+Model Town,28.702,77.19,residential
+Azadpur,28.707,77.18,residential
+Adarsh Nagar,28.717,77.17,residential
+Wazirpur,28.693,77.16,residential
+Mangolpuri,28.684,77.09,residential
+Paschim Vihar,28.669,77.08,residential
+Tilak Nagar,28.639,77.09,residential
+Vikaspuri,28.64,77.08,residential
+Uttam Nagar,28.62,77.05,residential
+Najafgarh,28.61,76.98,residential
+Palam Vihar,28.57,77.08,residential
+Mehrauli,28.52,77.18,residential
+Chhatarpur,28.5,77.17,residential
+Vasant Vihar,28.57,77.16,residential
+Munirka,28.56,77.17,residential
+IIT Delhi,28.545,77.192,campus
+AIIMS,28.567,77.209,residential
+Inderpuri,28.63,77.16,residential
+Naraina,28.625,77.155,residential
+Kirti Nagar,28.65,77.14,residential
+Punjabi Bagh,28.664,77.13,residential
+Rajendra Place,28.641,77.19,residential
+Karampura,28.65,77.12,residential
+Anand Parbat,28.655,77.18,residential
+Sadar Bazaar,28.664,77.2,residential
+Daryaganj,28.643,77.25,residential
+ITO,28.63,77.245,residential
+Laxmi Nagar,28.63,77.28,residential
+Preet Vihar,28.64,77.3,residential
+Mayur Vihar,28.61,77.32,residential
+Patparganj,28.62,77.31,residential
+Pandav Nagar,28.625,77.295,residential
+Trilokpuri,28.62,77.32,residential
+Kalyanpuri,28.615,77.33,residential
+Vivek Vihar,28.67,77.31,residential
+Shahdara,28.67,77.29,residential
+Seemapuri,28.68,77.31,residential
+Dilshad Garden,28.675,77.32,residential
+Yamuna Vihar,28.68,77.27,residential
+Bhajanpura,28.69,77.26,residential
+Karawal Nagar,28.71,77.27,residential
+Gokulpuri,28.695,77.29,residential
+Mandoli,28.72,77.3,residential
+Sonia Vihar,28.725,77.26,residential
+Burari,28.74,77.22,residential
+Sant Nagar,28.72,77.2,residential
+Majnu ka Tilla,28.718,77.23,campus
+Narela,28.83,77.08,residential
+Bawana,28.79,77.03,residential
+Alipur,28.81,77.12,residential
+Mundka,28.68,77.04,residential
+Tikri Kalan,28.68,77.01,residential
+Nangloi,28.67,77.07,residential
+Kirari,28.7,77.08,residential
+Mangolpur Kalan,28.72,77.1,residential
+Rithala,28.73,77.11,residential
+Samaypur,28.75,77.15,residential
+Badli,28.74,77.16,residential
+Libaspur,28.75,77.17,residential
+Chandigarh,30.7333,76.7794,safe_ip
+Ludhiana,30.901,75.8573,commercial
+Amritsar,31.634,74.8723,commercial
+Jalandhar,31.326,75.5762,commercial
+Patiala,30.3398,76.3869,commercial
+Bathinda,30.211,74.9455,commercial
+Mohali,30.7046,76.7179,safe_ip
+Pathankot,32.2746,75.6521,residential
+Hoshiarpur,31.5286,75.9115,residential
+Moga,30.8162,75.1741,residential
+Barnala,30.3819,75.5486,residential
+Sangrur,30.2458,75.8421,residential
+Kapurthala,31.3811,75.3797,residential
+Firozpur,30.9294,74.6134,residential
+Fazilka,30.4036,74.0279,highway
+Muktsar,30.4724,74.5135,highway
+Mansa,29.9889,75.3944,highway
+Fatehgarh Sahib,30.6397,76.3925,residential
+Rupnagar,30.966,76.5233,safe_ip
+Nawanshahr,31.1261,76.1142,residential
+Gurdaspur,32.0404,75.4032,residential
+Tarn Taran,31.4518,74.927,residential
+Phagwara,31.224,75.7708,commercial
+Rajpura,30.484,76.5934,commercial
+Zirakpur,30.6434,76.8171,safe_ip
+Khanna,30.6973,76.2155,commercial
+Abohar,30.1451,74.1951,commercial
+Malerkotla,30.531,75.882,commercial
+Dera Bassi,30.5889,76.8484,safe_ip
+Gobindgarh,30.671,76.3003,commercial
+Samana,30.153,76.187,highway
+Sunam,30.128,75.801,highway
+Morinda,30.7906,76.4955,safe_ip
+Anandpur Sahib,31.2394,76.5034,campus
+Nangal,31.3876,76.3737,safe_ip
+Ropar,30.966,76.5233,safe_ip
+Kharar,30.746,76.6477,safe_ip
+Kurali,30.874,76.5535,safe_ip
+Bassi Pathana,30.52,76.391,highway
+Sirhind,30.6465,76.386,residential
+Doraha,30.796,75.983,commercial
+Jagraon,30.7896,75.474,commercial
+Nakodar,31.1258,75.4747,residential
+Sultanpur Lodhi,31.2177,75.194,campus
+Phillaur,31.0233,75.784,residential
+Samrala,30.837,76.191,residential
+Machhiwara,30.919,76.2,highway
+Raikot,30.655,75.604,commercial
+Ahmedgarh,30.683,75.802,commercial
+Patti,31.283,74.859,highway
