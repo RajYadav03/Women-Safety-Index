@@ -8,6 +8,7 @@ import urllib.request
 import wave
 import subprocess
 import tempfile
+import threading
 import numpy as np
 from pathlib import Path
 
@@ -30,9 +31,11 @@ THREAT_CATEGORIES = {
 }
 
 # Interpreter and label state
-_interpreter = None
 _labels = []
 _threat_indices = {}
+
+# Thread-local storage for YAMNet interpreter to make it thread-safe under WSGI/Gunicorn
+_local_state = threading.local()
 
 def ensure_model_installed():
     """Ensure YAMNet TFLite model and labels are downloaded."""
@@ -64,51 +67,51 @@ def ensure_model_installed():
 
 def load_yamnet():
     """Load the YAMNet interpreter and map threat indices."""
-    global _interpreter, _labels, _threat_indices
-    if _interpreter is not None:
-        return
-
+    global _labels, _threat_indices
     ensure_model_installed()
 
-    # Load labels from CSV
-    import csv
-    _labels = [""] * 521
-    with open(LABELS_PATH, "r", encoding="utf-8") as f:
-        reader = csv.reader(f)
-        next(reader)  # Skip header row
-        for row in reader:
-            if len(row) >= 3:
-                idx = int(row[0])
-                display_name = row[2].strip().replace('"', '')
-                _labels[idx] = display_name
+    if not _labels:
+        # Load labels from CSV
+        import csv
+        _labels = [""] * 521
+        with open(LABELS_PATH, "r", encoding="utf-8") as f:
+            reader = csv.reader(f)
+            next(reader)  # Skip header row
+            for row in reader:
+                if len(row) >= 3:
+                    idx = int(row[0])
+                    display_name = row[2].strip().replace('"', '')
+                    _labels[idx] = display_name
 
-    # Map threat categories to actual indices
-    _threat_indices = {}
-    for cat_name, keywords in THREAT_CATEGORIES.items():
-        indices = []
-        for kw in keywords:
-            for idx, label in enumerate(_labels):
-                if kw.lower() in label.lower():
-                    indices.append(idx)
-        _threat_indices[cat_name] = list(set(indices))
+        # Map threat categories to actual indices
+        _threat_indices = {}
+        for cat_name, keywords in THREAT_CATEGORIES.items():
+            indices = []
+            for kw in keywords:
+                for idx, label in enumerate(_labels):
+                    if kw.lower() in label.lower():
+                        indices.append(idx)
+            _threat_indices[cat_name] = list(set(indices))
 
-    # Try loading TFLite interpreter
-    try:
-        import tflite_runtime.interpreter as tflite
-        _interpreter = tflite.Interpreter(model_path=str(MODEL_PATH))
-    except ImportError:
+    # Allocate interpreter thread-locally if it doesn't exist for this thread
+    if not hasattr(_local_state, "interpreter"):
         try:
-            import tensorflow.lite as tflite
-            _interpreter = tflite.Interpreter(model_path=str(MODEL_PATH))
+            import tflite_runtime.interpreter as tflite
+            interpreter = tflite.Interpreter(model_path=str(MODEL_PATH))
         except ImportError:
-            raise ImportError(
-                "Could not import tflite_runtime or tensorflow. "
-                "Please run: pip install tflite-runtime"
-            )
+            try:
+                import tensorflow.lite as tflite
+                interpreter = tflite.Interpreter(model_path=str(MODEL_PATH))
+            except ImportError:
+                raise ImportError(
+                    "Could not import tflite_runtime or tensorflow. "
+                    "Please run: pip install tflite-runtime"
+                )
 
-    # Allocate tensors
-    _interpreter.allocate_tensors()
-    print("[Acoustic] YAMNet TFLite Model loaded and threat categories compiled successfully!")
+        # Allocate tensors
+        interpreter.allocate_tensors()
+        _local_state.interpreter = interpreter
+        print("[Acoustic] Thread-safe YAMNet TFLite Model loaded successfully for this worker thread!")
 
 def transcode_to_wav(file_bytes: bytes) -> bytes:
     """
@@ -118,9 +121,13 @@ def transcode_to_wav(file_bytes: bytes) -> bytes:
     in_fd, in_path = tempfile.mkstemp(suffix=".raw")
     out_fd, out_path = tempfile.mkstemp(suffix=".wav")
 
+    # Close raw file descriptors immediately to release locks on all platforms
+    os.close(in_fd)
+    os.close(out_fd)
+
     try:
-        # Write input bytes to temporary file
-        with os.fdopen(in_fd, 'wb') as f_in:
+        # Write input bytes to temporary file path
+        with open(in_path, 'wb') as f_in:
             f_in.write(file_bytes)
 
         # Run FFmpeg to transcode to 16kHz 16-bit mono PCM WAV
@@ -139,7 +146,7 @@ def transcode_to_wav(file_bytes: bytes) -> bytes:
             raise ValueError(f"FFmpeg transcode failed: {result.stderr.decode('utf-8', errors='ignore')}")
 
         # Read the transcoded wav file
-        with os.fdopen(out_fd, 'rb') as f_out:
+        with open(out_path, 'rb') as f_out:
             return f_out.read()
 
     except FileNotFoundError:
@@ -217,11 +224,14 @@ def classify_audio(file_bytes: bytes) -> dict:
     """
     load_yamnet()
 
+    # Get thread-local interpreter
+    interpreter = _local_state.interpreter
+
     # Read and normalize audio waveform
     waveform = read_wav_16k_mono(file_bytes)
 
-    input_details = _interpreter.get_input_details()
-    output_details = _interpreter.get_output_details()
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
 
     # YAMNet input shape is exactly [15600] samples (0.975s)
     window_size = 15600
@@ -238,10 +248,10 @@ def classify_audio(file_bytes: bytes) -> dict:
     for start in range(0, len(waveform) - window_size + 1, step_size):
         chunk = waveform[start : start + window_size]
 
-        # Run inference
-        _interpreter.set_tensor(input_details[0]['index'], chunk)
-        _interpreter.invoke()
-        output_data = _interpreter.get_tensor(output_details[0]['index'])
+        # Run inference on thread-local interpreter
+        interpreter.set_tensor(input_details[0]['index'], chunk)
+        interpreter.invoke()
+        output_data = interpreter.get_tensor(output_details[0]['index'])
 
         # output_data is shape [1, 521]
         window_scores.append(output_data[0])
@@ -269,8 +279,8 @@ def classify_audio(file_bytes: bytes) -> dict:
             highest_score = cat_score
             highest_category = cat_name
 
-    # Check threshold (>0.65)
-    is_anomaly = highest_score >= 0.65
+    # Check threshold (>0.45 for high responsiveness during live demos/presentations)
+    is_anomaly = highest_score >= 0.45
 
     return {
         "anomaly_detected": is_anomaly,
