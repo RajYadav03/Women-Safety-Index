@@ -279,8 +279,8 @@ def classify_audio(file_bytes: bytes) -> dict:
             highest_score = cat_score
             highest_category = cat_name
 
-    # Check threshold (>0.45 for high responsiveness during live demos/presentations)
-    is_anomaly = highest_score >= 0.45
+    # Check threshold (>0.05 for extreme responsiveness during live tests/demos)
+    is_anomaly = highest_score >= 0.05
 
     return {
         "anomaly_detected": is_anomaly,
