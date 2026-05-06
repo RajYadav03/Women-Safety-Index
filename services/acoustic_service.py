@@ -14,11 +14,11 @@ SERVICE_DIR = Path(__file__).resolve().parent
 BACKEND_ROOT = SERVICE_DIR.parent
 MODELS_DIR = BACKEND_ROOT / "models"
 MODEL_PATH = MODELS_DIR / "yamnet.tflite"
-LABELS_PATH = MODELS_DIR / "yamnet_classes.txt"
+LABELS_PATH = MODELS_DIR / "yamnet_classes.csv"
 
-# Model URLs (Official TensorFlow examples assets)
-MODEL_URL = "https://github.com/tensorflow/examples/raw/master/lite/examples/sound_classification/android/app/src/main/assets/yamnet.tflite"
-LABELS_URL = "https://github.com/tensorflow/examples/raw/master/lite/examples/sound_classification/android/app/src/main/assets/yamnet_label_list.txt"
+# Model URLs (Verified high-availability Google/TensorFlow hosts)
+MODEL_URL = "https://tfhub.dev/google/lite-model/yamnet/classification/tflite/1?lite-format=tflite"
+LABELS_URL = "https://raw.githubusercontent.com/tensorflow/models/master/research/audioset/yamnet/yamnet_class_map.csv"
 
 # Threat profiles
 THREAT_CATEGORIES = {
@@ -37,8 +37,13 @@ def ensure_model_installed():
     if not MODELS_DIR.exists():
         MODELS_DIR.mkdir(parents=True, exist_ok=True)
 
+    # Note: Use a custom User-Agent to bypass standard urllib 403 Forbidden on some Google Storage CDN links
+    opener = urllib.request.build_opener()
+    opener.addheaders = [('User-Agent', 'Mozilla/5.0')]
+    urllib.request.install_opener(opener)
+
     if not MODEL_PATH.exists():
-        print(f"[Acoustic] Downloading YAMNet TFLite model (15MB) from {MODEL_URL}...")
+        print(f"[Acoustic] Downloading YAMNet TFLite model (4.1MB) from TensorFlow Hub...")
         try:
             urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
             print("[Acoustic] YAMNet model downloaded successfully!")
@@ -47,10 +52,10 @@ def ensure_model_installed():
             raise
 
     if not LABELS_PATH.exists():
-        print(f"[Acoustic] Downloading YAMNet class labels from {LABELS_URL}...")
+        print(f"[Acoustic] Downloading YAMNet class mapping CSV from official repository...")
         try:
             urllib.request.urlretrieve(LABELS_URL, LABELS_PATH)
-            print("[Acoustic] Labels downloaded successfully!")
+            print("[Acoustic] Class mapping CSV downloaded successfully!")
         except Exception as e:
             print(f"[Acoustic] Error downloading labels: {e}")
             raise
@@ -63,9 +68,17 @@ def load_yamnet():
 
     ensure_model_installed()
 
-    # Load labels
-    with open(LABELS_PATH, "r") as f:
-        _labels = [line.strip() for line in f.readlines() if line.strip()]
+    # Load labels from CSV
+    import csv
+    _labels = [""] * 521
+    with open(LABELS_PATH, "r", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        next(reader)  # Skip header row
+        for row in reader:
+            if len(row) >= 3:
+                idx = int(row[0])
+                display_name = row[2].strip().replace('"', '')
+                _labels[idx] = display_name
 
     # Map threat categories to actual indices
     _threat_indices = {}
