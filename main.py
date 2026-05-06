@@ -26,7 +26,7 @@ from models.schemas import (
     SafeZoneResponse,
 )
 from config import BACKEND_ROOT
-from services import geo_service, prediction_service, llm_service, poi_service
+from services import geo_service, prediction_service, llm_service, poi_service, acoustic_service
 
 
 # ─────────────────────────────────────────────
@@ -246,6 +246,25 @@ async def transcribe(file: UploadFile = File(...)):
 
     except Exception as e:
         print(f"[Transcribe] Exception: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─────────────────────────────────────────────
+# Acoustic Monitoring (YAMNet Classification)
+# ─────────────────────────────────────────────
+@app.post("/analyze-acoustic", tags=["AI"])
+async def analyze_acoustic(file: UploadFile = File(...)):
+    """
+    Accepts a continuous audio chunk (.wav), decodes and resamples
+    it to 16kHz, runs YAMNet sliding-window inference, and returns
+    probabilities for safety threats (Scream, Shatter, Gunfire).
+    """
+    try:
+        content = await file.read()
+        analysis = acoustic_service.classify_audio(content)
+        return analysis
+    except Exception as e:
+        print(f"[Acoustic] Exception: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
