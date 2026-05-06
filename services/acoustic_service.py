@@ -6,6 +6,8 @@ import io
 import os
 import urllib.request
 import wave
+import subprocess
+import tempfile
 import numpy as np
 from pathlib import Path
 
@@ -108,15 +110,72 @@ def load_yamnet():
     _interpreter.allocate_tensors()
     print("[Acoustic] YAMNet TFLite Model loaded and threat categories compiled successfully!")
 
+def transcode_to_wav(file_bytes: bytes) -> bytes:
+    """
+    Tries to transcode incoming compressed audio bytes (AAC/3GP/M4A)
+    to a standard 16kHz mono WAV file using system FFmpeg.
+    """
+    in_fd, in_path = tempfile.mkstemp(suffix=".raw")
+    out_fd, out_path = tempfile.mkstemp(suffix=".wav")
+
+    try:
+        # Write input bytes to temporary file
+        with os.fdopen(in_fd, 'wb') as f_in:
+            f_in.write(file_bytes)
+
+        # Run FFmpeg to transcode to 16kHz 16-bit mono PCM WAV
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", in_path,
+            "-ar", "16000",
+            "-ac", "1",
+            "-f", "wav",
+            out_path
+        ]
+
+        # Run subprocess silently
+        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if result.returncode != 0:
+            raise ValueError(f"FFmpeg transcode failed: {result.stderr.decode('utf-8', errors='ignore')}")
+
+        # Read the transcoded wav file
+        with os.fdopen(out_fd, 'rb') as f_out:
+            return f_out.read()
+
+    except FileNotFoundError:
+        raise RuntimeError(
+            "System FFmpeg was not found on the server. To support Android cloud acoustic classification, "
+            "please add the Heroku FFmpeg buildpack: "
+            "'heroku buildpacks:add --index 1 heroku-community/ffmpeg-common'"
+        )
+    finally:
+        # Clean up files safely
+        try:
+            os.remove(in_path)
+        except OSError:
+            pass
+        try:
+            os.remove(out_path)
+        except OSError:
+            pass
+
 def read_wav_16k_mono(file_bytes: bytes) -> np.ndarray:
     """
     Decodes raw WAV bytes, normalizes samples to Float32 [-1.0, 1.0],
-    and resamples to exactly 16kHz mono using linear interpolation.
+    and resamples to exactly 16kHz mono. Handles native WAV as well as M4A/3GP.
     """
     try:
         f = wave.open(io.BytesIO(file_bytes), 'rb')
     except Exception as e:
-        raise ValueError(f"Failed to parse WAV audio bytes: {e}")
+        print(f"[Acoustic] Header check failed ({e}). Attempting FFmpeg transcoding fallback...")
+        try:
+            transcoded_bytes = transcode_to_wav(file_bytes)
+            f = wave.open(io.BytesIO(transcoded_bytes), 'rb')
+        except Exception as trans_err:
+            raise ValueError(
+                f"Failed to parse audio. Not a valid WAV file, and FFmpeg transcoding failed.\n"
+                f"Error details: {trans_err}"
+            )
 
     try:
         n_channels, sampwidth, framerate, n_frames = f.getparams()[:4]
