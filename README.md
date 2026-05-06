@@ -98,7 +98,7 @@ Now launch the interactive React Native mobile application:
 ```bash
 cd wsi-app
 npm install
-npx expo start
+npx expo start -c
 ```
 
 ### 3. AI Setup (Optional)
