@@ -249,6 +249,7 @@ async def transcribe(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+
 # ─────────────────────────────────────────────
 # Acoustic Monitoring (YAMNet Classification)
 # ─────────────────────────────────────────────
@@ -262,6 +263,7 @@ async def analyze_acoustic(file: UploadFile = File(...)):
     try:
         content = await file.read()
         analysis = acoustic_service.classify_audio(content)
+        print(f"[Acoustic Analysis] Result: {analysis}")
         return analysis
     except Exception as e:
         print(f"[Acoustic] Exception: {e}")
